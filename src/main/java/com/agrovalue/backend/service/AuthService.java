@@ -1,11 +1,18 @@
 package com.agrovalue.backend.service;
 
-import com.agrovalue.backend.entity.User;
-import com.agrovalue.backend.repository.UserRepository;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.agrovalue.backend.dto.AuthResponse;
+import com.agrovalue.backend.dto.RegisterRequest;
+import com.agrovalue.backend.entity.Role;
+import com.agrovalue.backend.entity.User;
+import com.agrovalue.backend.repository.RoleRepository;
+import com.agrovalue.backend.repository.UserRepository;
+import com.agrovalue.backend.security.JwtUtil;
 
 @Service
 public class AuthService {
@@ -14,26 +21,47 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private EmailService emailService;
 
-    public String register(User user) {
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return "Email already exists";
-        }
+    // ✅ REGISTER
+    public String register(RegisterRequest request) {
 
-        user.setVerified(false);
-
-        String token = UUID.randomUUID().toString();
-        user.setVerificationToken(token);
-
-        userRepository.save(user);
-
-        emailService.sendVerificationEmail(user.getEmail(), token);
-
-        return "User registered. Check email for verification.";
+    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        return "Email already exists";
     }
 
+    User user = new User();
+    user.setName(request.getName());
+    user.setEmail(request.getEmail());
+    user.setPassword(request.getPassword());
+    user.setVerified(false);
+
+    // 🔥 Normalize role input
+    String roleName = "ROLE_" + request.getRole().toUpperCase();
+
+    Role role = roleRepository.findByName(roleName)
+            .orElseThrow(() -> new RuntimeException("Invalid role"));
+
+    user.setRoles(Set.of(role));
+
+    // 📧 Email verification
+    String token = UUID.randomUUID().toString();
+    user.setVerificationToken(token);
+
+    userRepository.save(user);
+
+    emailService.sendVerificationEmail(user.getEmail(), token);
+
+    return "User registered. Check email.";
+}
+
+    // ✅ VERIFY EMAIL
     public String verifyUser(String token) {
 
         User user = userRepository.findByVerificationToken(token)
@@ -47,19 +75,24 @@ public class AuthService {
         return "Email verified successfully!";
     }
 
-    public String login(String email, String password) {
+    // ✅ LOGIN (JWT)
+    public AuthResponse login(String email, String password) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!user.isVerified()) {
-            return "Please verify your email first";
-        }
-
-        if (!user.getPassword().equals(password)) {
-            return "Invalid password";
-        }
-
-        return "Login successful"; // later replace with JWT
+    if (!user.isVerified()) {
+        throw new RuntimeException("Verify email first");
     }
+
+    if (!user.getPassword().equals(password)) {
+        throw new RuntimeException("Invalid password");
+    }
+
+    String token = jwtUtil.generateToken(email);
+
+    String role = user.getRoles().iterator().next().getName();
+
+    return new AuthResponse(token, email, role);
+}
 }
