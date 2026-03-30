@@ -27,6 +27,19 @@ public class User {
     // 🔐 Email verification
     private boolean isVerified = false;
     private String verificationToken;
+    
+    // 🌐 OAuth2 Fields
+    @Column(name = "provider")
+    private String provider;  // "google" or "local"
+    
+    @Column(name = "provider_id")
+    private String providerId; // Google sub ID
+    
+    @Column(name = "image_url")
+    private String imageUrl;
+    
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
 
     // 🔑 Roles
     @ManyToMany(fetch = FetchType.EAGER)
