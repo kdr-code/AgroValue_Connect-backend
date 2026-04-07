@@ -14,9 +14,13 @@ import org.springframework.web.cors.*;
 
 import java.util.Arrays;
 
+// 🔥 ADD THESE IMPORTS
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // 🔥 REQUIRED for @PreAuthorize
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -35,12 +39,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
 
-            // 🔐 Stateless (JWT)
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // 🔐 Authorization
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/auth/**",
@@ -51,11 +53,9 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
 
-                // 🔥 IMPORTANT: REMOVE permitAll for products
                 .anyRequest().authenticated()
             )
 
-            // 🔐 OAuth2 login
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(customOAuth2UserService)
@@ -63,7 +63,6 @@ public class SecurityConfig {
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 
-        // 🔥 JWT filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -84,5 +83,11 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    // 🔐 PASSWORD ENCODER (🔥 THIS FIXES YOUR ERROR)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
