@@ -2,6 +2,9 @@ package com.agrovalue.backend.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +22,7 @@ import com.agrovalue.backend.service.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-
+	private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
@@ -74,12 +77,19 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse addProductWithImage(ProductRequest request, MultipartFile file) {
 
+        logger.info("Starting product creation with image");
+
         // 🖼️ Upload image
         String imageUrl = fileService.uploadFile(file);
 
+        logger.info("Image uploaded: {}", imageUrl);
+
         // 👨‍🌾 Get farmer
         User farmer = userRepository.findById(request.getFarmerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
+                .orElseThrow(() -> {
+                    logger.error("Farmer not found with ID: {}", request.getFarmerId());
+                    return new ResourceNotFoundException("Farmer not found");
+                });
 
         // 📦 Create product
         Product product = new Product();
@@ -88,7 +98,13 @@ public class ProductServiceImpl implements ProductService {
         // 🔥 Override image URL
         product.setImageUrl(imageUrl);
 
-        return mapToResponse(productRepository.save(product));
+        logger.info("Saving product: {}", request.getName());
+
+        Product savedProduct = productRepository.save(product);
+
+        logger.info("Product saved successfully with ID: {}", savedProduct.getId());
+
+        return mapToResponse(savedProduct);
     }
 
     // ✅ UPDATE
