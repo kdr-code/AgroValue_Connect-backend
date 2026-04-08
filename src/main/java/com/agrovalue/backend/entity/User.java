@@ -5,6 +5,9 @@ import lombok.*;
 import java.util.Set;
 import java.util.List;
 
+// 🔥 ADD THIS
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Getter
 @Setter
@@ -24,33 +27,33 @@ public class User {
 
     private String password;
 
-    // 🔐 Email verification
     private boolean isVerified = false;
     private String verificationToken;
-    
-    // 🌐 OAuth2 Fields
+
     @Column(name = "provider")
-    private String provider;  // "google" or "local"
-    
+    private String provider;
+
     @Column(name = "provider_id")
-    private String providerId; // Google sub ID
-    
+    private String providerId;
+
     @Column(name = "image_url")
     private String imageUrl;
-    
+
     @Column(name = "email_verified")
     private boolean emailVerified = false;
 
-    // 🔑 Roles
+    // 🔥 FIX 1
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnore
     private Set<Role> roles;
 
-    // 📦 Orders
+    // 🔥 FIX 2
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Order> orders;
 }

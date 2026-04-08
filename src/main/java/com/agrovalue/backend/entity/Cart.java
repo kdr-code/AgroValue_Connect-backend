@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+// 🔥 ADD THIS
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Getter
 @Setter
@@ -16,17 +19,19 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // One cart per user
+    // 🔥 FIX 1
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
-    // Cart contains multiple products
+    // 🔥 FIX 2
     @ManyToMany
     @JoinTable(
         name = "cart_products",
         joinColumns = @JoinColumn(name = "cart_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
+    @JsonIgnore
     private List<Product> products;
 }
