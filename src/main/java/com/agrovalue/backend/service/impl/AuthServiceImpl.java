@@ -93,8 +93,15 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(email);
-
+        String token = jwtUtil.generateToken(
+				new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+						email,
+						null,
+						user.getRoles().stream()
+								.map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.getName()))
+								.toList()
+				)
+		);
         String role = user.getRoles().iterator().next().getName();
 
         return new AuthResponse(token, email, role);

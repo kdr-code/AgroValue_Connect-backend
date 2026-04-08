@@ -1,15 +1,20 @@
 package com.agrovalue.backend.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.agrovalue.backend.dto.DashboardStatsResponse;
 import com.agrovalue.backend.dto.OrderResponse;
 import com.agrovalue.backend.dto.ProductResponse;
 import com.agrovalue.backend.service.FarmerDashboardService;
 
-import java.util.List;
-
+@PreAuthorize("hasRole('FARMER')") // 🔥 Only farmers can access this controller
 @RestController
 @RequestMapping("/api/farmers")
 public class FarmerDashboardController {
