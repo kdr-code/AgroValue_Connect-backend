@@ -2,6 +2,7 @@ package com.agrovalue.backend.security;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -26,33 +27,44 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-        
-        // Only skip login and OAuth initiation endpoints
-        if (path.equals("/auth/login") || 
+        String path = request.getServletPath();
+
+        // 🔥 Skip Swagger + Auth + OAuth endpoints
+        if (path.startsWith("/v3/api-docs") ||
+            path.startsWith("/swagger-ui") ||
+            path.startsWith("/swagger-ui.html") ||
+            path.equals("/auth/login") ||
             path.equals("/auth/register") ||
             path.startsWith("/oauth2/authorization") ||
             path.startsWith("/login/oauth2")) {
+
             chain.doFilter(request, response);
             return;
         }
 
-        // Process JWT for all other endpoints including /auth/oauth2/user
+        // 🔐 JWT processing
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            
+
             try {
                 if (jwtUtil.validateToken(token)) {
                     String email = jwtUtil.extractEmail(token);
+
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {
-                // Token invalid - continue without authentication
+                // ❌ Invalid token → ignore (no crash)
             }
         }
 

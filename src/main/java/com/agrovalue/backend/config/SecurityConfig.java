@@ -4,17 +4,20 @@ import com.agrovalue.backend.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import org.springframework.web.cors.*;
 
 import java.util.Arrays;
 
-// 🔥 ADD THESE IMPORTS
+// 🔥 PASSWORD ENCODER IMPORTS
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -39,6 +42,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
 
+            // 🔐 Stateless for JWT
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -53,9 +57,21 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
 
-                .anyRequest().authenticated()
+                .requestMatchers("/api/**").authenticated() // 🔥 APIs need JWT
+
+                .anyRequest().permitAll()
             )
 
+            // 🔥 IMPORTANT: stop redirect → return 401 instead
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint((req, res, ex) -> {
+                    res.setStatus(401);
+                    res.setContentType("application/json");
+                    res.getWriter().write("{\"error\": \"Unauthorized\"}");
+                })
+            )
+
+            // 🌐 OAuth only for browser
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(customOAuth2UserService)
@@ -63,6 +79,7 @@ public class SecurityConfig {
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 
+        // 🔐 JWT filter before username/password filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -85,7 +102,7 @@ public class SecurityConfig {
         return source;
     }
 
-    // 🔐 PASSWORD ENCODER (🔥 THIS FIXES YOUR ERROR)
+    // 🔐 PASSWORD ENCODER
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
