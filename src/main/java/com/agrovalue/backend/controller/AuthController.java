@@ -13,6 +13,8 @@ import com.agrovalue.backend.dto.LoginRequest;
 import com.agrovalue.backend.dto.RegisterRequest;
 import com.agrovalue.backend.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("*")
@@ -37,5 +39,11 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request.getEmail(), request.getPassword());
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        request.getSession().invalidate();
+        return "Logged out";
     }
 }
