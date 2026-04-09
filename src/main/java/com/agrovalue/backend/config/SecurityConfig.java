@@ -17,7 +17,7 @@ import org.springframework.web.cors.*;
 
 import java.util.Arrays;
 
-// 🔥 PASSWORD ENCODER IMPORTS
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -42,7 +42,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
 
-            // 🔐 Stateless for JWT
+            
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
 
-            // 🔥 return 401 instead of redirect
+            
             .exceptionHandling(e -> e
                 .authenticationEntryPoint((req, res, ex) -> {
                     res.setStatus(401);
@@ -71,7 +71,7 @@ public class SecurityConfig {
                 })
             )
 
-            // 🌐 OAuth
+            
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(customOAuth2UserService)
@@ -79,19 +79,19 @@ public class SecurityConfig {
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 
-        // 🔐 JWT filter
+        
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 🌐 CORS CONFIG (FIXED)
+    
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // ✅ FIX
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -102,7 +102,7 @@ public class SecurityConfig {
         return source;
     }
 
-    // 🔐 PASSWORD ENCODER
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
