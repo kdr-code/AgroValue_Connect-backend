@@ -38,7 +38,7 @@ public class ProductController {
     }
 
     // 🔥 ONLY FARMER can add product
-    @PreAuthorize("hasRole('FARMER')")
+    @PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')") 
     @PostMapping
     public ResponseEntity<ProductResponse> addProduct(@Valid @RequestBody ProductRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -46,7 +46,7 @@ public class ProductController {
     }
 
     // 🔥 ONLY FARMER can update
-    @PreAuthorize("hasRole('FARMER')")
+    @PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')") 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id,
                                                          @Valid @RequestBody ProductRequest request) {
@@ -62,7 +62,7 @@ public class ProductController {
     }
 
     // 🔥 ONLY FARMER (with image upload)
-    @PreAuthorize("hasRole('FARMER')")
+    @PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')") 
     @PostMapping("/with-image")
     public ResponseEntity<ProductResponse> addProductWithImage(
             @RequestPart("product") @Valid ProductRequest request,

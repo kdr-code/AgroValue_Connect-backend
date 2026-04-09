@@ -14,7 +14,7 @@ import com.agrovalue.backend.dto.OrderResponse;
 import com.agrovalue.backend.dto.ProductResponse;
 import com.agrovalue.backend.service.FarmerDashboardService;
 
-@PreAuthorize("hasRole('FARMER')") // 🔥 Only farmers can access this controller
+@PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/farmers")
 public class FarmerDashboardController {

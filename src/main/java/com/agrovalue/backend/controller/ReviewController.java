@@ -3,6 +3,7 @@ package com.agrovalue.backend.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.agrovalue.backend.dto.ReviewRequest;
@@ -11,6 +12,7 @@ import com.agrovalue.backend.service.ReviewService;
 
 import java.util.List;
 
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
