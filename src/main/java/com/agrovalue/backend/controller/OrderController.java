@@ -24,7 +24,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // 🔥 PLACE ORDER → ONLY BUYER
+    
     @PreAuthorize("hasRole('BUYER')")
     @PostMapping
     public ResponseEntity<OrderResponse> placeOrder(@Valid @RequestBody PlaceOrderRequest request) {
@@ -34,7 +34,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // 🔥 GET USER ORDERS → BUYER OR ADMIN
+    
     @PreAuthorize("hasAnyRole('BUYER','ADMIN')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<OrderResponse>> getUserOrders(@PathVariable Long userId) {
@@ -44,7 +44,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    // 🔥 GET ORDER DETAILS → BUYER OR ADMIN
+    
     @PreAuthorize("hasAnyRole('BUYER','ADMIN')")
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderDetails(@PathVariable Long orderId) {

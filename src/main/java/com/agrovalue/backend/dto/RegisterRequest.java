@@ -7,5 +7,5 @@ public class RegisterRequest {
     private String name;
     private String email;
     private String password;
-    private String role; // 🔥 ADD THIS
+    private String role; 
 }

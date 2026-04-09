@@ -17,7 +17,7 @@ import com.agrovalue.backend.dto.UpdateCartItemRequest;
 import com.agrovalue.backend.service.CartService;
 
 import jakarta.validation.Valid;
-//ALLOW ALL LOGGED IN USERS
+
 @PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/cart")
