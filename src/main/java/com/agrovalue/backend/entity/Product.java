@@ -8,7 +8,7 @@ import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
 
-// 🔥 ADD THIS
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
@@ -37,13 +37,13 @@ public class Product {
 
     private String imageUrl;
 
-    // 🔥 FIX 1
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "farmer_id", nullable = false)
     @JsonIgnore
     private User farmer;
 
-    // 🔥 FIX 2
+    
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
