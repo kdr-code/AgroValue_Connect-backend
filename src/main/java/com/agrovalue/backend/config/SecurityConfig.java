@@ -57,12 +57,12 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
 
-                .requestMatchers("/api/**").authenticated() // 🔥 APIs need JWT
+                .requestMatchers("/api/**").authenticated()
 
                 .anyRequest().permitAll()
             )
 
-            // 🔥 IMPORTANT: stop redirect → return 401 instead
+            // 🔥 return 401 instead of redirect
             .exceptionHandling(e -> e
                 .authenticationEntryPoint((req, res, ex) -> {
                     res.setStatus(401);
@@ -71,7 +71,7 @@ public class SecurityConfig {
                 })
             )
 
-            // 🌐 OAuth only for browser
+            // 🌐 OAuth
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(customOAuth2UserService)
@@ -79,19 +79,19 @@ public class SecurityConfig {
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 
-        // 🔐 JWT filter before username/password filter
+        // 🔐 JWT filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 🌐 CORS CONFIG
+    // 🌐 CORS CONFIG (FIXED)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // ✅ FIX
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
