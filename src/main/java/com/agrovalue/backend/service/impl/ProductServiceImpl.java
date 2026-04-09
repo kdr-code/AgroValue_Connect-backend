@@ -26,9 +26,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
-    private final FileService fileService; // ✅ added
+    private final FileService fileService;
 
-    // ✅ Constructor Injection
+    
     public ProductServiceImpl(ProductRepository productRepository,
                               UserRepository userRepository,
                               ReviewRepository reviewRepository,
@@ -39,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         this.fileService = fileService;
     }
 
-    // ✅ GET ALL
+    
     @Override
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProducts() {
@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
     }
 
-    // ✅ GET BY ID
+    
     @Override
     @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(product);
     }
 
-    // ✅ CREATE (WITHOUT IMAGE)
+    
     @Override
     @Transactional
     public ProductResponse addProduct(ProductRequest request) {
@@ -72,30 +72,30 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(productRepository.save(product));
     }
 
-    // ✅ CREATE (WITH IMAGE) 🔥
+    
     @Override
     @Transactional
     public ProductResponse addProductWithImage(ProductRequest request, MultipartFile file) {
 
         logger.info("Starting product creation with image");
 
-        // 🖼️ Upload image
+       
         String imageUrl = fileService.uploadFile(file);
 
         logger.info("Image uploaded: {}", imageUrl);
 
-        // 👨‍🌾 Get farmer
+       
         User farmer = userRepository.findById(request.getFarmerId())
                 .orElseThrow(() -> {
                     logger.error("Farmer not found with ID: {}", request.getFarmerId());
                     return new ResourceNotFoundException("Farmer not found");
                 });
 
-        // 📦 Create product
+       
         Product product = new Product();
         applyRequest(product, request, farmer);
 
-        // 🔥 Override image URL
+        
         product.setImageUrl(imageUrl);
 
         logger.info("Saving product: {}", request.getName());
@@ -107,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(savedProduct);
     }
 
-    // ✅ UPDATE
+    
     @Override
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
@@ -123,7 +123,7 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(productRepository.save(product));
     }
 
-    // ✅ DELETE
+    
     @Override
     @Transactional
     public void deleteProduct(Long id) {
@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 
-    // ✅ GET BY FARMER
+    
     @Override
     @Transactional(readOnly = true)
     public List<ProductResponse> getProductsByFarmer(Long farmerId) {
@@ -144,17 +144,17 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
     }
 
-    // 🔧 COMMON MAPPING METHOD
+    
     private void applyRequest(Product product, ProductRequest request, User farmer) {
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
-        product.setImageUrl(request.getImageUrl()); // for non-image API
+        product.setImageUrl(request.getImageUrl()); 
         product.setFarmer(farmer);
     }
 
-    // 🔧 RESPONSE MAPPING
+    
     private ProductResponse mapToResponse(Product product) {
         ProductResponse response = new ProductResponse();
 
