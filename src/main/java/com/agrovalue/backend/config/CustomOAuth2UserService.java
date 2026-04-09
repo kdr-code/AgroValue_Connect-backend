@@ -29,16 +29,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         
-        // Get provider name
+        
         String provider = userRequest.getClientRegistration().getRegistrationId();
         
-        // Create user info based on provider
+        
         GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(oAuth2User.getAttributes());
         
-        // Save or update user
+        
         User user = saveOrUpdateUser(userInfo, provider);
         
-        // Return custom OAuth2 user with additional details
+        
         return new CustomOAuth2User(oAuth2User, user);
     }
     
@@ -54,14 +54,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setProviderId(userInfo.getId());
         user.setImageUrl(userInfo.getImageUrl());
         user.setEmailVerified(true);
-        user.setVerified(true); // OAuth users are automatically verified
+        user.setVerified(true); 
         
-        // Set default role if new user
+        
         if (user.getId() == null) {
-            // Create default roles if they don't exist
+            
             initializeDefaultRoles();
             
-            // Fetch the BUYER role from database
+            
             Role buyerRole = roleRepository.findByName("ROLE_BUYER")
                     .orElseThrow(() -> new RuntimeException("Default role ROLE_BUYER not found"));
             Set<Role> roles = new HashSet<>();
@@ -73,7 +73,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
     
     private void initializeDefaultRoles() {
-        // Create default roles if they don't exist
+        
         if (roleRepository.count() == 0) {
             Role adminRole = new Role();
             adminRole.setName("ROLE_ADMIN");
