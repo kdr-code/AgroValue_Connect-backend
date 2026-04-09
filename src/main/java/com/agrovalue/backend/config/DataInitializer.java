@@ -21,7 +21,7 @@ public class DataInitializer {
                                PasswordEncoder passwordEncoder) {
         return args -> {
 
-            // ✅ ROLES
+            
             Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                     .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_ADMIN")));
 
@@ -31,14 +31,14 @@ public class DataInitializer {
             Role buyerRole = roleRepository.findByName("ROLE_BUYER")
                     .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_BUYER")));
 
-            // ✅ ADMIN USER
+            
             if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
 
                 User admin = new User();
                 admin.setName("Admin");
                 admin.setEmail("admin@gmail.com");
 
-                // 🔐 encoded password
+                
                 admin.setPassword(passwordEncoder.encode("admin123"));
 
                 admin.setVerified(true);
@@ -46,7 +46,7 @@ public class DataInitializer {
 
                 admin.setProvider("local");
 
-                // ✅ IMPORTANT: Set<Role>
+                
                 admin.setRoles(Set.of(adminRole));
 
                 userRepository.save(admin);
