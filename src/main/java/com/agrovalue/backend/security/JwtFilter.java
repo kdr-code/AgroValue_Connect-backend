@@ -33,17 +33,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtUtil.validateToken(token)) {
 
-                // 🔥 Extract email
+                
                 String email = jwtUtil.extractEmail(token);
 
-                // 🔥 Load user from DB
+                
                 var userDetails = userDetailsService.loadUserByUsername(email);
 
-                // 🔥 USE DB ROLES (NOT JWT ROLE)
+                
                 var auth = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities() // ✅ FIXED
+                        userDetails.getAuthorities() 
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
